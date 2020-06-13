@@ -135,6 +135,7 @@ def Solve(type_search):
 
         if node is None:
             no_solution = True
+            print_grid()
             return
 
         elif node.state == destination:
@@ -170,11 +171,13 @@ def A_Solve():
     explored = set()
     num_explored = 0
 
+    last_algo = 'A'
+
     if start is None or destination is None:
         print_grid()
         current_tool = 'pencil'
         return -1
-    last_algo = 'A'
+
     frontier = ds.PriorityQueue()
     start_node = ds.PQ_Entry(start, None, None, math.inf)
     frontier.add(start_node)
@@ -185,6 +188,7 @@ def A_Solve():
 
         if latest_node is None:
             no_solution = True
+            print_grid()
             return
 
         elif latest_node.state == destination:
