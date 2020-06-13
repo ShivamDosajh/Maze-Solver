@@ -6,7 +6,7 @@ import pygame
 import DS as ds  # File with data structures
 
 fps = 100
-dim = (1000, 600)
+dim = (1200, 600)
 caption = 'Maze Solver'
 y_margin = 80
 
@@ -25,7 +25,7 @@ is_grid = True
 
 no_solution = False
 
-current_tool = 'pencil'
+current_tool = None
 last_algo = None
 
 rect_coords = set()
@@ -291,6 +291,7 @@ def button(msg, text_color, buttonx, buttony, buttonwidth, buttonheight, size, i
     global is_grid
     (x, y) = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
+
     if buttonx < x < buttonwidth + buttonx and buttony < y < buttonheight + buttony:
         pygame.draw.rect(gameDisplay, active_color, (buttonx, buttony, buttonwidth, buttonheight))
         if click[0] == 1 and action != None:
@@ -402,7 +403,8 @@ def clear_tool():
     start = None
     destination = None
     print_grid()
-    current_tool = 'pencil'
+    if current_tool is not None:
+        current_tool = 'pencil'
     if no_solution:
         no_solution = False
 
@@ -622,6 +624,8 @@ def GameLoop():
 
         if current_tool == 'pencil':
             pencil_tool()
+        elif current_tool == None:
+            clear_tool()
         elif current_tool == 'eraser':
             eraser_tool()
         elif current_tool == 'clear':
