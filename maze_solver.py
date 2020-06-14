@@ -1,14 +1,17 @@
 import math
 import time
-
 import pygame
-
 import DS as ds  # File with data structures
 
+pygame.init()
 fps = 100
-dim = (1200, 600)
+
+dim = (1200, 640) #Please do NOT change this for a better experience
 caption = 'Maze Solver'
-y_margin = 80
+y_margin = 80  #Please do NOT change this for a better experience
+
+img = pygame.image.load('images/icon.png')
+pygame.display.set_icon(img)
 
 black = (0, 0, 0)
 white = (255, 255, 255)
@@ -20,7 +23,9 @@ blue = (0, 0, 255)
 light_yellow = (255, 255, 0)
 yellow = (200, 200, 0)
 
+prev_box_size = 20
 box_size = 20
+change_box_size = False
 is_grid = True
 
 no_solution = False
@@ -34,14 +39,16 @@ explored_coords = set()
 start = None
 destination = None
 
-pygame.init()
 gameDisplay = pygame.display.set_mode(dim)
 pygame.display.set_caption(caption)
+bg = pygame.image.load('images/background_image.png')
+gameDisplay.blit(bg, (0,0))
+
 clock = pygame.time.Clock()
 
-smallfont = pygame.font.SysFont("comicsansms", 20, False, False)
-medfont = pygame.font.SysFont("comicsansms", 30, False, False)
-largefont = pygame.font.SysFont("comicsansms", 65, False, False)
+smallfont = pygame.font.SysFont("lucidasans", 20, False, False)
+medfont = pygame.font.SysFont("lucidasans", 30, False, False)
+largefont = pygame.font.SysFont("archristyopentype", 80, False, False)
 
 tim = 0
 
@@ -289,6 +296,8 @@ def button(msg, text_color, buttonx, buttony, buttonwidth, buttonheight, size, i
            action=None):
     global current_tool
     global is_grid
+    global box_size
+    global change_box_size
     (x, y) = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
 
@@ -301,6 +310,7 @@ def button(msg, text_color, buttonx, buttony, buttonwidth, buttonheight, size, i
             elif action == 'controls':
                 controls_page()
             elif action == 'play':
+                change_box_size = False
                 GameLoop()
             elif action == 'starting_page':
                 start_screen()
@@ -326,11 +336,20 @@ def button(msg, text_color, buttonx, buttony, buttonwidth, buttonheight, size, i
                 options_page()
             elif action == 'maze':
                 current_tool = 'maze'
+            elif action == '5px':
+                box_size = 5
+            elif action == '10px':
+                box_size = 10
+            elif action == '20px':
+                box_size = 20
+            elif action == '40px':
+                box_size = 40
+
 
             elif action == 'toggle grid':
                 if is_grid == False:
                     is_grid = True
-                else:
+                elif is_grid == True:
                     is_grid = False
             elif action == 'show stats':
                 if len(sol_coords) != 0:
@@ -341,6 +360,9 @@ def button(msg, text_color, buttonx, buttony, buttonwidth, buttonheight, size, i
                     button(f'Time taken(s): {tim}', black, dim[0] // 2 - 50, 260, 350, 30,
                            'small',
                            light_yellow, light_yellow)
+            elif action == 'block size':
+                change_box_size = True
+
     else:
         pygame.draw.rect(gameDisplay, inactive_color, (buttonx, buttony, buttonwidth, buttonheight))
     textSurface, textRect = text_objects(msg, text_color, size)
@@ -496,14 +518,16 @@ def message_to_screen(msg, color, y_displace=0, size='small'):
 
 def start_screen():
     gameIntro = True
-    gameDisplay.fill(white)
+    gameDisplay.blit(bg,(0,0))
     while gameIntro:
 
-        message_to_screen("Welcome to Maze Solver!", black, -50, 'large')
+        message_to_screen("Welcome to Maze Solver!", black, 10, 'large')
+        message_to_screen('v1.1',black,70,'small')
 
-        button("Play", black, dim[0] // 2 - 50 - 150, 500, 100, 50, 'small', green, light_green, 'play')
-        button("Controls", black, dim[0] // 2 - 50, 500, 100, 50, 'small', yellow, light_yellow, 'controls')
+        button("Let's Go!", black, dim[0] // 2 - 50 - 150, 500, 100, 50, 'small', green, light_green, 'play')
+        button("Help", black, dim[0] // 2 - 50, 500, 100, 50, 'small', yellow, light_yellow, 'controls')
         button("Quit", black, dim[0] // 2 - 50 + 150, 500, 100, 50, 'small', red, light_red, 'quit')
+        button('@ShivamD.',black,dim[0] -110, dim[1]-50, 110, 50,'small',white,white)
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -525,6 +549,8 @@ def start_screen():
 
 
 def options_page():
+    global box_size
+    global prev_box_size
     options = True
     gameDisplay.fill(white)
     while options:
@@ -544,7 +570,31 @@ def options_page():
 
         button('Show Stats', black, dim[0] // 2 - 50, 150, 120, 30, 'small', red, light_green, action='show stats')
 
-        button('Go Back', black, dim[0] // 2 - 50, 400, 100, 30, 'small', red, light_green, action='play')
+        button('Block Size', black, dim[0]//2 - 50, 350, 120, 30, 'small', red, light_green, action='block size')
+
+        if change_box_size:
+            if box_size == 5:
+                button('5px', black, dim[0] // 2 - 50, 400, 100, 30, 'small', light_green, light_green, action='5px')
+            else:
+                button('5px', black, dim[0] // 2 - 50, 400, 100, 30, 'small', red, light_green, action='5px')
+            if box_size == 10:
+                button('10px', black, dim[0] // 2 - 50, 450, 100, 30, 'small', light_green, light_green, action='10px')
+            else:
+                button('10px', black, dim[0] // 2 - 50, 450, 100, 30, 'small', red, light_green, action='10px')
+            if box_size == 20:
+                button('20px', black, dim[0] // 2 - 50, 500, 100, 30, 'small', light_green, light_green, action='20px')
+            else:
+                button('20px', black, dim[0] // 2 - 50, 500, 100, 30, 'small', red, light_green, action='20px')
+            if box_size == 40:
+                button('40px', black, dim[0] // 2 - 50, 550, 100, 30, 'small', light_green, light_green, action='40px')
+            else:
+                button('40px', black, dim[0] // 2 - 50, 550, 100, 30, 'small', red, light_green, action='40px')
+
+        if box_size != prev_box_size:
+            clear_tool()
+            prev_box_size = box_size
+
+        button('Go Back', black, dim[0] // 2 - 50, 600, 100, 30, 'small', red, light_green, action='play')
 
         pygame.display.update()
     clock.tick(30)
@@ -552,7 +602,7 @@ def options_page():
 
 def controls_page():
     controls = True
-    gameDisplay.fill(light_yellow)
+    gameDisplay.fill(white)
     while controls:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -563,13 +613,18 @@ def controls_page():
                     controls = False
                     start_screen()
 
-        button('Use the pencil tool to draw the maze', black, dim[0] // 2, 100, 10, 10, 'medium', light_yellow,
-               light_yellow)
-        button('Use Set A and Set B to chose starting and ending point respectively', black, dim[0] // 2, 150, 10, 10,
-               'medium', light_yellow, light_yellow)
-        button('Select the algorithm you want to use!', black, dim[0] // 2, 200, 10, 10, 'medium', light_yellow,
-               light_yellow)
-        button('Go Back', black, dim[0] // 2 - 50, 250, 100, 30, 'small', green, light_green, action='starting_page')
+
+
+        message_to_screen('Use the pencil tool to draw the maze', black,-250,'medium')
+        message_to_screen('Use Set A and Set B to chose starting and ending point respectively', black,-200,'medium')
+        message_to_screen('Select the algorithm you want to use!', light_red, -150, 'medium')
+        message_to_screen('Green path is the computer generated solution', green, -100, 'medium')
+        message_to_screen('Yellow region represents total cells explored by computer',yellow, -50, 'medium' )
+        message_to_screen('For a given solution, drag point A or point B around to see continuous solutions in real time!', light_red, 0)
+        pygame.draw.line(gameDisplay, red, (dim[0]//2 - 440, 330),(dim[0]//2 + 440, 330))
+        message_to_screen('Visit *Options* to hide/show grid, show stats or change box size ', black, 50,'medium')
+
+        button('Go Back', black, dim[0] // 2 - 50, 450, 100, 30, 'small', green, light_green, action='starting_page')
         pygame.display.update()
     clock.tick(5)
 
@@ -620,7 +675,7 @@ def GameLoop():
 
         # button('Maze', black, 840, 20, y_margin, 30,'small', red,light_green,'maze' )
 
-        button('Quit', black, 900, 20, y_margin, 30, 'small', red, light_green, 'quit')
+        button('Quit', black, dim[0] - 100, 20, y_margin, 30, 'small', red, light_green, 'quit')
 
         if current_tool == 'pencil':
             pencil_tool()
